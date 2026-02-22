@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeneShield | AI Companion</title>
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/chat.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+  <style>body.auth-pending { visibility: hidden; }</style>
+</head>
+<body class="auth-pending">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="logo GeneSheild" alt="GeneShield" style="height:36px;width:36px;border-radius:50%;object-fit:cover;">
+      <span class="brand-name">Gene<span class="brand-accent">Shield</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><i class='bx bx-grid-alt'></i><span>Dashboard</span></a>
+      <a href="vitals.html" class="nav-item"><i class='bx bx-pulse'></i><span>Log Vitals</span></a>
+      <a href="chat.html" class="nav-item active"><i class='bx bx-bot'></i><span>AI Companion</span></a>
+      <a href="#" class="nav-item" onclick="event.preventDefault(); generatePDFReport()"><i class='bx bx-dna'></i><span>Risk Report</span></a>
+      <a href="onboarding.html" class="nav-item"><i class='bx bx-user'></i><span>Profile</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" class="nav-item logout" id="logoutBtn"><i class='bx bx-log-out'></i><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle"><i class='bx bx-menu'></i></button>
+        <div class="chat-topbar-info">
+          <div class="ai-avatar-sm"><i class='bx bx-bot'></i></div>
+          <div>
+            <h1 class="page-title">GeneShield AI</h1>
+            <p class="page-sub ai-status"><span class="dot"></span> Online · Your personal health companion</p>
+          </div>
+        </div>
+      </div>
+      <button class="clear-chat-btn" id="clearChatBtn"><i class='bx bx-trash'></i> Clear Chat</button>
+    </header>
+
+    <div class="chat-layout">
+
+      <div class="chat-main">
+        <div class="chat-messages" id="chatMessages">
+          <div class="msg-row ai">
+            <div class="msg-avatar"><i class='bx bx-bot'></i></div>
+            <div class="msg-bubble ai">
+              <p>Hello! I'm your GeneShield AI cancer companion. I help you understand your hereditary cancer risks, interpret your family history, and guide you toward the right screenings and preventive steps.</p>
+              <p style="margin-top:8px;">Ask me anything about cancer prevention, screening schedules, or lifestyle changes!</p>
+              <span class="msg-time">Just now</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="suggested-prompts" id="suggestedPrompts">
+          <span class="prompts-label">Suggested questions:</span>
+          <div class="prompt-chips">
+            <button class="prompt-chip" onclick="sendPrompt(this)">My mother had breast cancer — what does that mean for me?</button>
+            <button class="prompt-chip" onclick="sendPrompt(this)">Explain how my family history affects my cancer risk</button>
+            <button class="prompt-chip" onclick="sendPrompt(this)">What screenings should I get based on my family's cancer history?</button>
+            <button class="prompt-chip" onclick="sendPrompt(this)">I want to understand my hereditary risk score</button>
+            <button class="prompt-chip" onclick="sendPrompt(this)">Give me a personalised cancer prevention plan</button>
+          </div>
+        </div>
+
+        <div class="chat-input-bar">
+          <div class="chat-input-wrap">
+            <textarea id="chatInput" placeholder="Ask about your health, vitals, risks, or anything health-related..." rows="1"></textarea>
+            <button class="send-btn" id="sendBtn"><i class='bx bx-send'></i></button>
+          </div>
+          <p class="chat-disclaimer">GeneShield AI provides health information, not medical diagnosis. Always consult a qualified healthcare professional.</p>
+        </div>
+      </div>
+
+      <div class="chat-side-panel">
+        <div class="side-card">
+          <h4><i class='bx bx-user-circle'></i> Your Health Context</h4>
+          <div class="context-items" id="contextItems">
+            <div class="ctx-item"><span class="ctx-label">Loading risks...</span><span class="ctx-val">--</span></div>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <h4><i class='bx bx-history'></i> Previous Sessions</h4>
+          <div class="history-sessions">
+            <div class="session-item active"><i class='bx bx-chat'></i><div><span class="session-title">Current Session</span><span class="session-date">Today</span></div></div>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <h4><i class='bx bx-zap'></i> Quick Actions</h4>
+          <div class="quick-actions">
+            <a href="vitals.html" class="qa-btn"><i class='bx bx-plus-circle'></i> Log Symptoms</a>
+            <button class="qa-btn" onclick="sendPrompt({textContent:'Give me my cancer screening schedule based on my risk profile'})"><i class='bx bx-calendar-check'></i> Screening Schedule</button>
+            <button class="qa-btn" onclick="sendPrompt({textContent:'What lifestyle changes can I make today to lower my cancer risk?'})"><i class='bx bx-leaf'></i> Prevention Tips</button>
+            <button class="qa-btn" onclick="generatePDFReport()" style="background:linear-gradient(135deg,rgba(0,181,255,0.08),rgba(0,181,255,0.15));border-color:rgba(0,181,255,0.3);"><i class='bx bx-download' style="color:#00b5ff;"></i> Download PDF Report</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/chat.js"></script>
+  <script>
+    async function loadSidePanel() {
+      try {
+        const scores = await getLatestRiskScores();
+        const ctx = document.getElementById('contextItems');
+        if (scores) {
+          const items = [];
+          const riskNames = {
+            breast_cancer: 'Breast Cancer Risk',
+            cervical_cancer: 'Cervical Cancer Risk',
+            prostate_cancer: 'Prostate Cancer Risk',
+            colorectal_cancer: 'Colorectal Cancer Risk'
+          };
+          for (const [key, label] of Object.entries(riskNames)) {
+            const val = scores[key];
+            if (val !== undefined && val !== null) {
+              const cls = val >= 60 ? 'high' : val >= 40 ? 'warn' : 'ok';
+              const lvl = val >= 60 ? 'High' : val >= 40 ? 'Moderate' : 'Low';
+              items.push(`<div class="ctx-item"><span class="ctx-label">${label}</span><span class="ctx-val ${cls}">${lvl} · ${val}%</span></div>`);
+            }
+          }
+          if (items.length > 0) {
+            ctx.innerHTML = items.join('');
+          } else {
+            ctx.innerHTML = '<div class="ctx-item"><span class="ctx-label">No scores yet</span><span class="ctx-val">--</span></div>';
+          }
+        }
+      } catch (err) {
+        console.error('Side panel load error:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await requireAuth();
+      if (!user) return;
+      document.body.classList.remove('auth-pending');
+      loadSidePanel();
+
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          try { await signOut(); } catch { window.location.href = 'login.html'; }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
